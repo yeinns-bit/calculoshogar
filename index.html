@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#14213D">
+<title>Administración de vivienda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#14213D;--ink2:#1E2E52;--paper:#F4F5F8;--surface:#fff;--line:#E1E4EA;--line2:#EEF0F4;
+  --text:#1A2233;--mut:#667089;--brass:#A9833F;--brass-d:#7F6229;--brass-soft:#F5EFE2;
+  --pos:#1B7355;--neg:#B3382C;--neg-soft:#FBEEEC;--amber:#9A6510;--amber-soft:#FFF5E0;
+  --f:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:var(--f);background:var(--paper);color:var(--text);font-size:15px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+textarea{resize:vertical;display:block}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- estructura ---------- */
+.app{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh}
+.side{background:var(--ink);color:#fff;display:flex;flex-direction:column;padding:22px 14px 16px;position:sticky;top:0;height:100vh}
+.brand{display:flex;gap:11px;align-items:center;padding:0 8px 22px}
+.brand svg{flex:none}
+.brand strong{font-stretch:118%;font-weight:600;font-size:15px;line-height:1.2;letter-spacing:.1px}
+#nav{flex:1}
+.grp{font-size:12px;color:#8E9ABB;padding:14px 10px 6px}
+#nav button{display:block;width:100%;text-align:left;background:none;border:0;border-left:3px solid transparent;color:#C9D1E6;padding:9px 10px 9px 11px;border-radius:0 6px 6px 0;cursor:pointer}
+#nav button:hover{background:rgba(255,255,255,.06);color:#fff}
+#nav button.on{background:rgba(255,255,255,.09);color:#fff;border-left-color:var(--brass);font-weight:600}
+.sync{display:flex;gap:9px;align-items:flex-start;text-align:left;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 11px;color:#DCE2F2;font-size:12.5px;line-height:1.35;cursor:pointer;width:100%}
+.sync i{flex:none;width:9px;height:9px;border-radius:50%;margin-top:4px;background:#E0A93B}
+.sync[data-s=ok] i{background:#3FC08B}.sync[data-s=err] i{background:#EE6A5B}
+.sync[data-s=busy] i{background:#9FB0DA;animation:pulse 1s infinite alternate}
+@keyframes pulse{to{opacity:.35}}
+main{padding:30px 34px 70px;min-width:0}
+.inner{max-width:1180px;margin:0 auto}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+h1{font-stretch:122%;font-weight:600;font-size:25px;letter-spacing:-.2px;margin:0;color:var(--ink)}
+h2{font-stretch:114%;font-weight:600;font-size:16.5px;margin:0;color:var(--ink)}
+h3{font-size:13.5px;font-weight:600;margin:0 0 8px;color:var(--text)}
+p{margin:0 0 10px}
+
+/* ---------- piezas ---------- */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px 22px}
+.panel+.panel{margin-top:16px}
+.cols{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));align-items:start}
+.cols>.panel{margin-top:0}
+.banner{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--amber-soft);border:1px solid #EFD9A8;border-radius:8px;padding:10px 14px;margin-bottom:18px;color:#5E4311;font-size:14px}
+label{display:block;font-size:13px;color:var(--mut);margin-bottom:5px;font-weight:500}
+input,select,textarea{padding:9px 11px;border:1px solid #CDD2DC;border-radius:6px;background:#fff;width:100%;min-width:0}
+input[type=number]{font-variant-numeric:tabular-nums}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--brass);outline-offset:0;border-color:var(--brass)}
+.btn{background:var(--ink);color:#fff;border:1px solid var(--ink);border-radius:6px;padding:9px 18px;cursor:pointer;font-weight:600;white-space:nowrap}
+.btn:hover{background:var(--ink2)}
+.btn.sec{background:#fff;color:var(--ink);border-color:#C5CBD8}
+.btn.sec:hover{background:var(--paper)}
+.btn.dan{background:#fff;color:var(--neg);border-color:#E6C2BD}
+.link{background:none;border:0;padding:0;color:var(--brass-d);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.link.neg{color:var(--neg)}
+.acts{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:18px}
+.hint{font-size:13px;color:var(--mut);margin-top:6px}
+.warn{color:var(--amber);font-weight:600}
+.neg{color:var(--neg)}.pos{color:var(--pos)}
+.err{background:var(--neg-soft);border:1px solid #EBC8C3;color:#7C241B;border-radius:8px;padding:10px 14px;margin-top:14px;font-size:14px}
+.err ul{margin:4px 0 0;padding-left:18px}
+.f3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.f2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.sel{display:flex;gap:8px;align-items:center}
+.sel select{width:auto}
+.step{width:36px;height:38px;border:1px solid #C5CBD8;background:#fff;border-radius:6px;cursor:pointer;font-size:18px;line-height:1}
+.step:disabled{opacity:.35;cursor:default}
+.empty{text-align:center;padding:44px 20px;color:var(--mut)}
+
+/* ---------- resumen ---------- */
+.hero{display:grid;grid-template-columns:minmax(220px,1fr) minmax(0,1.5fr);gap:26px;align-items:end}
+.hero .big{font-stretch:112%;font-weight:600;font-size:40px;letter-spacing:-.6px;color:var(--ink);line-height:1.1;margin-top:4px}
+.strip{display:flex;gap:6px;height:104px}
+.bar{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:0;padding:0;cursor:pointer}
+.bar b{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center}
+.bar i{display:block;width:100%;max-width:30px;background:#CBD1DD;border-radius:3px 3px 0 0}
+.bar:hover i{background:#AEB7C9}.bar.on i{background:var(--brass)}
+.bar span{font-size:11.5px;color:var(--mut)}.bar.on span{color:var(--ink);font-weight:600}
+.unit header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.unit .amt{font-stretch:112%;font-weight:600;font-size:24px;color:var(--ink)}
+.svc{padding:14px 0;border-bottom:1px solid var(--line2)}
+.svc:last-child{border-bottom:0;padding-bottom:0}
+.svc-h{display:flex;justify-content:space-between;gap:10px;font-weight:600;margin-bottom:8px}
+.meter{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--mut);font-size:13.5px}
+.dial{display:inline-flex;gap:2px}
+.dial i{font-style:normal;font-weight:600;font-size:14px;font-variant-numeric:tabular-nums;width:19px;height:25px;display:grid;place-items:center;background:var(--ink);color:#fff;border-radius:3px}
+.dial.now i:last-child{background:var(--brass)}
+.meter .cons{margin-left:auto}
+
+/* ---------- tablas ---------- */
+.tbl{overflow-x:auto;margin:14px -22px -20px;border-top:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{font-weight:600;font-size:13px;color:var(--mut);padding:10px 8px;text-align:right;white-space:nowrap;background:#FAFBFC;border-bottom:1px solid var(--line)}
+td{padding:9px 8px;border-bottom:1px solid var(--line2);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+th:first-child,td:first-child{text-align:left;padding-left:22px}
+th:last-child,td:last-child{padding-right:22px}
+tr:last-child td{border-bottom:0}
+tr.sum td{font-weight:600;background:#FAFBFC;border-top:1px solid var(--line)}
+td.flag{color:var(--amber);font-weight:600}
+
+/* ---------- cuentas de la casa ---------- */
+.eq{display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center}
+.eq .fig{flex:1 1 150px}
+.eq .op{font-size:26px;color:#A3ABBD;font-weight:400}
+.fig span{display:block;font-size:13px;color:var(--mut)}
+.fig b{display:block;font-stretch:112%;font-weight:600;font-size:27px;letter-spacing:-.3px;color:var(--ink)}
+.fig.key b{color:var(--pos)}.fig.owe b{color:var(--neg)}
+.div{display:flex;gap:3px;height:132px;margin-top:16px}
+.dcol{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center}
+.dcol b{width:100%;display:flex;justify-content:center;min-height:0}
+.dcol .up{align-items:flex-end;border-bottom:1px solid #B9C0CE}.dcol .dn{align-items:flex-start}
+.dcol i{display:block;width:100%;max-width:28px}
+.dcol .up i{background:var(--pos);border-radius:3px 3px 0 0;opacity:.85}.dcol .dn i{background:var(--neg);border-radius:0 0 3px 3px;opacity:.85}
+.dlab{display:flex;gap:3px;margin-top:6px}
+.dlab span{flex:1;min-width:0;text-align:center;font-size:11px;color:var(--mut);overflow:hidden;white-space:nowrap}
+.line{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line2)}
+.line span:last-child{white-space:nowrap;font-variant-numeric:tabular-nums}
+.line.t{border-bottom:0;font-weight:600;font-size:16px;color:var(--ink);padding-top:12px}
+.grow{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) auto;gap:8px;align-items:center;margin-bottom:8px}
+tr{background:#fff}
+td.ra,th.ra{position:sticky;right:0;background:inherit;box-shadow:-1px 0 0 var(--line)}th.ra{background:#FAFBFC}
+td.ra .link{margin-left:10px;font-weight:500}td.ra .link:first-child{margin-left:0}
+td .sub{display:block;font-size:12px;color:var(--mut);font-weight:400;max-width:190px;overflow:hidden;text-overflow:ellipsis;margin-left:auto}
+dialog{border:0;border-radius:12px;padding:0;width:min(540px,calc(100% - 28px));color:var(--text);box-shadow:0 24px 60px rgba(20,33,61,.35)}
+dialog::backdrop{background:rgba(20,33,61,.5)}
+.dh{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.db{padding:6px 20px 14px;max-height:62vh;overflow:auto}
+.df{display:flex;gap:10px;flex-wrap:wrap;padding:14px 20px;border-top:1px solid var(--line);background:#FAFBFC}
+.line.in span:first-child{padding-left:16px;color:var(--mut)}
+.nota{background:var(--brass-soft);border-radius:8px;padding:10px 12px;margin-top:12px;font-size:14px;white-space:pre-wrap}
+ol.steps{margin:0 0 6px;padding-left:20px}ol.steps li{margin-bottom:7px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;box-shadow:0 8px 24px rgba(20,33,61,.28);z-index:9;max-width:90vw}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media (min-width:1000px){.wide{grid-column:span 2}}
+@media (max-width:860px){
+  .app{display:block}
+  .side{position:static;height:auto;padding:14px 14px 0}
+  .brand{padding:0 2px 12px}
+  .sync{margin-bottom:12px}
+  #nav{display:flex;overflow-x:auto;gap:2px;margin:0 -14px;padding:0 10px;order:3}
+  .grp{display:none}
+  #nav button{width:auto;white-space:nowrap;border-left:0;border-bottom:3px solid transparent;border-radius:6px 6px 0 0;padding:10px 12px}
+  #nav button.on{border-bottom-color:var(--brass)}
+  main{padding:20px 16px 60px}
+  h1{font-size:21px}
+  .hero{grid-template-columns:1fr}.hero .big{font-size:33px}
+  .eq{display:block}.eq .op{display:none}
+  .fig{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px solid var(--line2)}
+  .fig b{font-size:21px}
+  .panel{padding:16px}
+  .tbl{margin:14px -16px -16px}
+  th:first-child,td:first-child{padding-left:16px}
+  .meter .cons{margin-left:0;flex-basis:100%}
+  td.ra [data-ed],td.ra [data-del]{display:none}
+  .dlab span{font-size:0}.dlab span::first-letter{font-size:11px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="15.5" fill="none" stroke="#A9833F" stroke-width="2"/><path d="M17 5v3M29 17h-3M5 17h3M25.5 8.5l-2.1 2.1M8.5 8.5l2.1 2.1" stroke="#8E9ABB" stroke-width="1.6" stroke-linecap="round"/><path d="M17 17l6-7" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><circle cx="17" cy="17" r="2.3" fill="#fff"/><rect x="11" y="22" width="12" height="4.5" rx="1" fill="#1E2E52" stroke="#8E9ABB"/></svg>
+      <strong>Administración<br>de vivienda</strong>
+    </div>
+    <nav id="nav" aria-label="Secciones"></nav>
+    <button class="sync" id="sync" data-s="local"><i></i><span id="synct">Guardado solo en este navegador</span></button>
+  </aside>
+  <main><div class="inner"><div id="banner"></div><div id="view"></div></div></main>
+</div>
+<dialog id="dlg" aria-labelledby="dlgT"></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+const SEED={"v":5,"tope":15000,"unidades":[{"id":"apto","nombre":"Apartamento","gas":true},{"id":"local","nombre":"Local Principal","gas":false}],"registros":[{"p":"2025-01","u":"apto","agua":[76,80,3038],"energia":[917,972,878]},{"p":"2025-02","u":"apto","agua":[80,83,3038],"energia":[972,1043,884]},{"p":"2025-03","u":"apto","agua":[83,88,3038],"energia":[1043,1117,879]},{"p":"2025-04","u":"apto","agua":[88,94,3140],"energia":[1117,1201,878]},{"p":"2025-05","u":"apto","agua":[94,100,3140],"energia":[1201,1286,878]},{"p":"2025-06","u":"apto","agua":[100,106,3140],"energia":[1286,1373,742]},{"p":"2025-07","u":"apto","agua":[106,112,3140],"energia":[1373,1460,742]},{"p":"2025-08","u":"apto","agua":[112,118,3140],"energia":[1460,1546,773]},{"p":"2025-09","u":"apto","agua":[118,124,3140],"energia":[1546,1640,773]},{"p":"2025-10","u":"apto","agua":[124,130,3200],"energia":[1640,1715,779]},{"p":"2025-11","u":"apto","agua":[130,136,3200],"energia":[1715,1792,771]},{"p":"2025-12","u":"apto","agua":[136,141,3200],"energia":[1792,1877,785]},{"p":"2026-01","u":"apto","agua":[141,146,3200],"energia":[1877,1950,774]},{"p":"2026-02","u":"apto","agua":[146,151,3200],"energia":[1950,2026,761]},{"p":"2026-03","u":"apto","agua":[151,154,3200],"energia":[2026,2100,758]},{"p":"2026-04","u":"apto","agua":[154,159,3200],"energia":[2100,2172,758]},{"p":"2026-05","u":"apto","agua":[159,162,3200],"energia":[2172,2272,801]},{"p":"2026-06","u":"apto","agua":[162,165,3200],"energia":[2272,2357,801]},{"p":"2026-07","u":"apto","agua":[165,167,3200],"energia":[2357,2437,801]},{"p":"2026-08","u":"apto","agua":[167,169,3200],"energia":[2437,2517,801]},{"p":"2026-09","u":"apto","agua":[169,170,3200],"energia":[2517,2601,801]},{"p":"2025-01","u":"local","agua":[15,16,3038],"energia":[436,464,878]},{"p":"2025-02","u":"local","agua":[16,17,3038],"energia":[464,499,884]},{"p":"2025-03","u":"local","agua":[17,18,3038],"energia":[499,530,879]},{"p":"2025-04","u":"local","agua":[18,18,3140],"energia":[530,563,878]},{"p":"2025-05","u":"local","agua":[18,18,3140],"energia":[563,596,878]},{"p":"2025-06","u":"local","agua":[18,18,3140],"energia":[596,638,742]},{"p":"2025-07","u":"local","agua":[18,20,3140],"energia":[638,684,742]},{"p":"2025-08","u":"local","agua":[20,21,3140],"energia":[684,731,773]},{"p":"2025-09","u":"local","agua":[21,23,3140],"energia":[731,774,773]},{"p":"2025-10","u":"local","agua":[23,24,3200],"energia":[774,811,779]},{"p":"2025-11","u":"local","agua":[24,25,3200],"energia":[811,849,779]},{"p":"2025-12","u":"local","agua":[25,29,3200],"energia":[849,886,785]},{"p":"2026-01","u":"local","agua":[29,34,3200],"energia":[886,917,774]},{"p":"2026-02","u":"local","agua":[34,38,3200],"energia":[917,948,761]},{"p":"2026-03","u":"local","agua":[38,41,3200],"energia":[948,987,758]},{"p":"2026-04","u":"local","agua":[41,42,3200],"energia":[987,1024,758]},{"p":"2026-05","u":"local","agua":[42,43,3200],"energia":[1024,1072,801]},{"p":"2026-06","u":"local","agua":[43,44,3200],"energia":[1072,1114,801]},{"p":"2026-07","u":"local","agua":[44,45,3200],"energia":[1114,1161,801]},{"p":"2026-08","u":"local","agua":[45,45,3200],"energia":[1161,1211,801]},{"p":"2026-09","u":"local","agua":[45,46,3200],"energia":[1211,1253,801]}],"gas":{"2026-06":17500},"casa":{"meses":{"2025-04":{"arriendo":1800000,"servicios":673176,"pagoInq":100000,"otros":396000,"gastos":[{"d":"","v":396000}]},"2025-05":{"arriendo":1800000,"servicios":622838,"pagoInq":151000,"otros":1800000,"gastos":[{"d":"","v":1800000}]},"2025-06":{"arriendo":1800000,"servicios":647000,"pagoInq":100000,"gastos":[{"d":"","v":210000}],"otros":210000},"2025-07":{"arriendo":1800000,"servicios":615000,"pagoInq":189000,"otros":500000,"gastos":[{"d":"","v":500000}]},"2025-08":{"arriendo":1800000,"servicios":646000,"pagoInq":85300,"otros":180000,"gastos":[{"d":"","v":180000}]},"2025-09":{"arriendo":1800000,"servicios":640000,"pagoInq":140000,"otros":4000000,"gastos":[{"d":"","v":4000000}]},"2025-10":{"arriendo":1800000,"servicios":630000,"pagoInq":117600,"otros":30000,"gastos":[{"d":"","v":30000}]},"2025-11":{"arriendo":1800000,"servicios":643540,"pagoInq":78500,"otros":150000,"gastos":[{"d":"","v":150000}]},"2025-12":{"arriendo":1800000,"servicios":724000,"pagoInq":161000,"otros":1100000,"gastos":[{"d":"","v":1100000}]},"2026-01":{"arriendo":1800000,"servicios":692000,"pagoInq":72500,"otros":2100000,"gastos":[{"d":"","v":2100000}]},"2026-02":{"arriendo":1800000,"servicios":730000,"pagoInq":126000,"otros":400000,"hebert":500000,"gastos":[{"d":"","v":400000}]},"2026-03":{"arriendo":1800000,"servicios":708000,"pagoInq":66000,"otros":2020000,"hebert":500000,"gastos":[{"d":"","v":2020000}]},"2026-04":{"arriendo":1800000,"servicios":720000,"pagoInq":110000,"otros":620000,"hebert":500000,"gastos":[{"d":"","v":620000}]},"2026-05":{"arriendo":1800000,"servicios":729104,"pagoInq":129000,"otros":300000,"hebert":500000,"gastos":[{"d":"","v":300000}]},"2026-06":{"arriendo":1800000,"servicios":759539,"pagoInq":80000,"hebert":500000,"gastos":[{"d":"","v":190000}],"otros":190000},"2026-07":{"arriendo":1800000,"servicios":721000,"pagoInq":151000,"otros":495000,"hebert":500000,"gastos":[{"d":"","v":495000}]},"2026-08":{"arriendo":1800000,"servicios":671321,"otros":450000,"hebert":500000,"gastos":[{"d":"","v":450000}],"pagoInq":110530},"2026-09":{"arriendo":1800000,"servicios":751000,"pagoInq":107326,"hebert":500000,"gastos":[{"d":"","v":223023}],"otros":223023}},"hebertGastos":[{"d":"Gastado hasta agosto 2026 (del Excel)","v":2254000}],"debo":1250000}};
+const MES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const SERV=[['agua','Agua','m³',4],['energia','Energía','kWh',5]];
+/* Las claves de guardado no deben cambiar entre versiones: de ellas depende que los datos sigan ahí. */
+const LS='servicios_vivienda_v1', LSG='servicios_vivienda_gh', LSD='servicios_vivienda_pend';
+let D, tab='resumen', per, gh=null, sha=null, rev=0;
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const clone=o=>JSON.parse(JSON.stringify(o));
+const money=n=>(n<0?'−':'')+'$'+Math.abs(Math.round(n||0)).toLocaleString('es-CO');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pName=p=>MES[+p.slice(5)-1]+' '+p.slice(0,4);
+const pad=n=>String(n).padStart(2,'0');
+const sigP=p=>{let [y,m]=p.split('-').map(Number);m++;if(m>12){m=1;y++}return y+'-'+pad(m)};
+const hoyP=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)};
+function lsGet(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
+function lsDel(k){try{localStorage.removeItem(k)}catch(e){}}
+let toastT;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2600)}
+
+/* ---------- cálculo de servicios ---------- */
+const reg=(p,u)=>D.registros.find(r=>r.p===p&&r.u===u);
+const leido=a=>!!a&&a[0]!=null&&a[1]!=null;
+const cons=a=>leido(a)?a[1]-a[0]:0;
+const sub=a=>cons(a)*(a&&a[2]||0);
+const exced=p=>Math.max(0,(D.gas[p]||0)-D.tope);
+function total(p,u){const r=reg(p,u),un=D.unidades.find(x=>x.id===u);
+  return (r?sub(r.agua)+sub(r.energia):0)+(un&&un.gas?exced(p):0)}
+const totalMes=p=>D.unidades.reduce((s,u)=>s+total(p,u.id),0);
+function periodos(){const s=new Set(D.registros.map(r=>r.p));Object.keys(D.gas).forEach(p=>s.add(p));return [...s].sort()}
+/* Última lectura real de un servicio antes del periodo p */
+function prevS(p,u,k){return D.registros.filter(r=>r.u===u&&r.p<p&&r[k]&&r[k][1]!=null).sort((a,b)=>a.p<b.p?1:-1)[0]}
+function nextPer(){const ps=periodos();return ps.length?sigP(ps[ps.length-1]):hoyP()}
+
+/* ---------- guardado ---------- */
+const SYNC={local:'Guardado solo en este navegador',busy:'Sincronizando con GitHub…',ok:'Respaldado en GitHub',err:'Sin respaldar'};
+function setSync(s,extra){const e=$('#sync');e.dataset.s=s;$('#synct').textContent=SYNC[s]+(extra?': '+extra:'');banner()}
+function banner(){const b=$('#banner');if(!b)return;
+  if(!gh&&tab!=='respaldo')b.innerHTML=`<div class="banner"><span>Estos datos solo están guardados en este navegador. Si se borra o se daña el equipo, se pierden.</span><button class="btn sec" id="bgo">Configurar respaldo</button></div>`;
+  else b.innerHTML='';
+  const g=$('#bgo');if(g)g.onclick=()=>go('respaldo')}
+const b64e=s=>btoa(unescape(encodeURIComponent(s))), b64d=s=>decodeURIComponent(escape(atob(s.replace(/\s/g,''))));
+const ghUrl=()=>`https://api.github.com/repos/${encodeURIComponent(gh.owner)}/${encodeURIComponent(gh.repo)}/contents/${gh.path.split('/').map(encodeURIComponent).join('/')}`;
+const ghHead=()=>({Authorization:'Bearer '+gh.token,Accept:'application/vnd.github+json'});
+function ghErr(s){return s===401?'el token no es válido o venció':s===403?'el token no tiene permiso de escritura':s===404?'no se encuentra el repositorio':'GitHub respondió '+s}
+async function ghLoad(){
+  const r=await fetch(ghUrl()+'?t='+Date.now(),{headers:ghHead(),cache:'no-store'});
+  if(r.status===404){ // puede ser que falte el archivo (normal la primera vez) o el repositorio
+    const rr=await fetch(`https://api.github.com/repos/${encodeURIComponent(gh.owner)}/${encodeURIComponent(gh.repo)}`,{headers:ghHead()});
+    if(!rr.ok)throw new Error(ghErr(rr.status));sha=null;return null}
+  if(!r.ok)throw new Error(ghErr(r.status));
+  const j=await r.json();sha=j.sha;return JSON.parse(b64d(j.content));
+}
+async function ghSave(){
+  const body={message:'Actualización '+new Date().toISOString().slice(0,16).replace('T',' '),content:b64e(JSON.stringify(D,null,1))};
+  if(sha)body.sha=sha;
+  const put=()=>fetch(ghUrl(),{method:'PUT',headers:ghHead(),body:JSON.stringify(body)});
+  let r=await put();
+  if(r.status===409||r.status===422){await ghLoad();if(sha)body.sha=sha;else delete body.sha;r=await put()}
+  if(!r.ok)throw new Error(ghErr(r.status));
+  sha=(await r.json()).content.sha;
+}
+/* Guarda siempre en el navegador y, si hay respaldo configurado, también en GitHub.
+   Mientras haya cambios sin subir queda una marca, para subirlos en la próxima apertura en vez de perderlos. */
+async function save(){
+  rev++;D.ts=Date.now();
+  const okLocal=lsSet(LS,D);lsSet(LSD,1);
+  if(!gh){setSync('local');if(!okLocal)toast('No se pudo guardar en este navegador');return okLocal}
+  setSync('busy');
+  try{await ghSave();lsDel(LSD);setSync('ok');return true}
+  catch(e){setSync('err',e.message);return false}
+}
+function normalizar(){D.gas=D.gas||{};if(D.tope==null)D.tope=15000;D.registros=D.registros||[]}
+/* Actualizaciones de datos guardados con una versión anterior del sitio. */
+function migrar(){
+  const v=D.v||1;let ch=false;
+  if(v<2){ // correcciones del historial de servicios: los meses de esta versión reemplazan a los guardados
+    const ps=new Set(SEED.registros.map(r=>r.p));
+    D.registros=D.registros.filter(r=>!ps.has(r.p)).concat(clone(SEED.registros));
+    D.gas=Object.assign({},D.gas,SEED.gas);ch=true}
+  if(!D.casa||!D.casa.meses){D.casa=clone(SEED.casa);ch=true}
+  if(!D.casa.hebertGastos){D.casa.hebertGastos=[];ch=true}
+  if(v<4){ // "otros gastos" pasa a ser una lista con concepto; lo que había queda como un renglón sin detalle
+    Object.values(D.casa.meses).forEach(m=>{if(!m.gastos&&m.otros>0)m.gastos=[{d:'',v:m.otros}]});ch=true}
+  if(v<5){ // actualización de datos de octubre de 2026 (solo si los meses hasta septiembre están como ese día)
+    const C=D.casa,M=C.meses,lib=Object.keys(M).filter(p=>p<='2026-09').reduce((s,p)=>s+cLibre(M[p]),0),G=SEED_G;
+    if(Math.round(lib)===7499708&&M['2026-08']&&!M['2026-08'].pagoInq&&Object.keys(G).every(p=>M[p]&&cOtros(M[p])===0)){
+      M['2026-08'].pagoInq=110530;
+      Object.keys(G).forEach(p=>{M[p].gastos=[{d:'',v:G[p]}];M[p].otros=G[p]})}
+    delete C.ajustes;ch=true}
+  if(v<SEED.v){D.v=SEED.v;ch=true}
+  return ch;
+}
+const SEED_G={'2025-06':210000,'2026-06':190000,'2026-09':223023};
+const valido=j=>j&&Array.isArray(j.registros)&&Array.isArray(j.unidades);
+
+/* ---------- navegación ---------- */
+const NAV=[['Servicios',[['resumen','Resumen del mes'],['lecturas','Registrar lecturas'],['historial','Historial']]],
+           ['Casa',[['casa','Cuentas de la casa']]],['Datos',[['respaldo','Respaldo']]]];
+const VIEWS={resumen:vResumen,lecturas:vLecturas,historial:vHistorial,casa:vCasa,respaldo:vRespaldo};
+function render(){
+  $('#nav').innerHTML=NAV.map(([g,it])=>`<div class="grp">${g}</div>`+it.map(([k,t])=>`<button class="${k===tab?'on':''}" data-t="${k}"${k===tab?' aria-current="page"':''}>${t}</button>`).join('')).join('');
+  $('#view').oninput=null; // cada vista pone el suyo
+  const on=$('#nav .on'),nv=$('#nav');if(on&&nv.scrollWidth>nv.clientWidth)nv.scrollLeft=on.offsetLeft-nv.offsetLeft-(nv.clientWidth-on.offsetWidth)/2;
+  banner();VIEWS[tab]();
+}
+function go(t){tab=t;render();window.scrollTo(0,0)}
+$('#nav').onclick=e=>{const t=e.target.dataset.t;if(t)go(t)};
+$('#sync').onclick=()=>go('respaldo');
+const mesSel=(id,cur)=>`<select id="${id}" aria-label="Mes">${MES.map((m,i)=>`<option value="${pad(i+1)}" ${+cur.slice(5)===i+1?'selected':''}>${m}</option>`).join('')}</select>`;
+const anioSel=(id,cur,hasta)=>{const ys=[];for(let y=Math.max(hasta,+cur.slice(0,4))+1;y>=2024;y--)ys.push(y);
+  return `<select id="${id}" aria-label="Año">${ys.map(y=>`<option ${y==cur.slice(0,4)?'selected':''}>${y}</option>`).join('')}</select>`};
+const num=(id,lab,val,attr='')=>`<div><label for="${id}">${lab}</label><input type="number" inputmode="decimal" min="0" id="${id}" value="${val??''}" ${attr}></div>`;
+
+/* ---------- resumen ---------- */
+function dial(n,len,now){if(n==null)return '<span>sin lectura</span>';
+  return `<span class="dial${now?' now':''}" role="img" aria-label="${n}">${String(Math.round(n)).padStart(len,'0').split('').map(d=>`<i>${d}</i>`).join('')}</span>`}
+function vResumen(){
+  const ps=periodos();
+  if(!ps.length){$('#view').innerHTML=`<div class="head"><h1>Resumen del mes</h1></div><div class="panel empty"><p>Todavía no hay lecturas registradas.</p><button class="btn" id="e1">Registrar el primer mes</button></div>`;$('#e1').onclick=()=>go('lecturas');return}
+  if(!ps.includes(per))per=ps[ps.length-1];
+  const i=ps.indexOf(per),ult=ps.slice(-12),mx=Math.max(1,...ult.map(totalMes));
+  const strip=ult.map(p=>`<button class="bar${p===per?' on':''}" data-p="${p}" title="${pName(p)}: ${money(totalMes(p))}" aria-label="${pName(p)}: ${money(totalMes(p))}"><b><i style="height:${Math.max(2,totalMes(p)/mx*100)}%"></i></b><span>${MES[+p.slice(5)-1].slice(0,3)}</span></button>`).join('');
+  const cards=D.unidades.map(u=>{const r=reg(per,u.id);
+    const lines=SERV.map(([k,n,un,len])=>{const a=r&&r[k];
+      return `<div class="svc"><div class="svc-h"><span>${n}</span><span class="num">${money(sub(a))}</span></div>
+        <div class="meter">${leido(a)?`${dial(a[0],len)}<span aria-hidden="true">→</span>${dial(a[1],len,1)}<span class="cons">${cons(a)} ${un} a ${money(a[2])}</span>`:'<span>Sin lectura este mes</span>'}</div></div>`}).join('');
+    const g=u.gas?`<div class="svc"><div class="svc-h"><span>Excedente de gas</span><span class="num">${money(exced(per))}</span></div>
+        <div class="meter"><span>${D.gas[per]!=null?`Recibo de ${money(D.gas[per])}, tope de ${money(D.tope)}`:'Sin recibo registrado'}</span></div></div>`:'';
+    return `<section class="panel unit"><header><h2>${esc(u.nombre)}</h2><div class="amt num">${money(total(per,u.id))}</div></header>${lines}${g}</section>`}).join('');
+  $('#view').innerHTML=`<div class="head"><h1>Resumen del mes</h1>
+      <div class="sel"><button class="step" id="pp" aria-label="Mes anterior" ${i===0?'disabled':''}>‹</button>
+      <select id="selPer" aria-label="Periodo">${ps.slice().reverse().map(p=>`<option value="${p}" ${p===per?'selected':''}>${pName(p)}</option>`).join('')}</select>
+      <button class="step" id="pn" aria-label="Mes siguiente" ${i===ps.length-1?'disabled':''}>›</button></div></div>
+    <div class="panel hero"><div><div style="color:var(--mut)">Total a cobrar a inquilinos en ${pName(per)}</div><div class="big num" id="totMes">${money(totalMes(per))}</div></div>
+      <div class="strip" aria-label="Cobro de los últimos meses">${strip}</div></div>
+    <div class="cols" style="margin-top:16px">${cards}</div>`;
+  $('#selPer').onchange=e=>{per=e.target.value;render()};
+  $('#pp').onclick=()=>{per=ps[i-1];render()};$('#pn').onclick=()=>{per=ps[i+1];render()};
+  $$('.bar').forEach(b=>b.onclick=()=>{per=b.dataset.p;render()});
+}
+
+/* ---------- registrar lecturas ---------- */
+function vLecturas(){
+  const ps=periodos(),def=nextPer(),cur=window._edit||def,existe=D.registros.some(r=>r.p===cur)||D.gas[cur]!=null;
+  const blocks=D.unidades.map(u=>{const r=reg(cur,u.id);
+    return `<section class="panel"><h2 style="margin-bottom:14px">${esc(u.nombre)}</h2>`+SERV.map(([k,n,un])=>{const pv=prevS(cur,u.id,k);
+      const a=r&&r[k]?r[k]:[pv?pv[k][1]:null,null,pv?pv[k][2]:null],id=`${u.id}_${k}`;
+      const f=(i,lab)=>`<div><label for="i_${id}_${i}">${lab}</label><input type="number" inputmode="decimal" min="0" id="i_${id}_${i}" data-u="${u.id}" data-s="${k}" data-i="${i}" value="${a[i]??''}"></div>`;
+      return `<h3>${n} (${un})</h3><div class="f3">${f(0,'Lectura anterior')}${f(1,'Lectura actual')}${f(2,'Valor por unidad')}</div>
+        <div class="hint" id="h_${id}" style="min-height:20px;margin-bottom:14px"></div>`}).join('')+`</section>`}).join('');
+  $('#view').innerHTML=`<div class="head"><h1>Registrar lecturas</h1><div class="sel">${mesSel('fm',cur)}${anioSel('fy',cur,+def.slice(0,4))}</div></div>
+    <p class="hint" style="margin:-8px 0 16px">${existe?`${pName(cur)} ya tiene datos guardados: los cambios los reemplazan.`:'Mes nuevo. La lectura anterior y el valor por unidad vienen del último mes registrado; solo falta la lectura actual.'}</p>
+    <div class="cols">${blocks}
+    <section class="panel"><h2 style="margin-bottom:14px">Gas</h2>${num('fgas','Valor del recibo de gas',D.gas[cur])}
+      <div class="hint" id="h_gas" style="min-height:20px;margin-bottom:14px"></div>
+      ${num('ftope','Tope que cubre la casa',D.tope)}<div class="hint">Lo que pase del tope se suma al cobro del Apartamento. El tope aplica a todos los meses.</div></section></div>
+    <div id="lerr"></div>
+    <div class="acts"><button class="btn" id="bsave">Guardar ${pName(cur)}</button>${existe?'<button class="btn dan" id="bdel">Eliminar este mes</button>':''}</div>`;
+  const chg=()=>{window._edit=$('#fy').value+'-'+$('#fm').value;render()};
+  $('#fm').onchange=chg;$('#fy').onchange=chg;
+  const read=()=>{const o={};$$('input[data-u]').forEach(i=>{const u=i.dataset.u,s=i.dataset.s;o[u]=o[u]||{agua:[null,null,null],energia:[null,null,null]};o[u][s][+i.dataset.i]=i.value===''?null:+i.value});return o};
+  const hints=()=>{const o=read();D.unidades.forEach(u=>SERV.forEach(([k,n,un])=>{const a=o[u.id][k],h=$(`#h_${u.id}_${k}`),pv=prevS(cur,u.id,k);
+      let t='';
+      if(a[1]!=null&&a[0]!=null){const c=a[1]-a[0];t=c<0?'<span class="neg">La lectura actual es menor que la anterior.</span>':`Consumo de ${c} ${un}, ${money(c*(a[2]||0))}`}
+      if(pv&&a[0]!=null&&a[0]!==pv[k][1])t+=` <span class="warn">La lectura anterior no coincide con la de ${pName(pv.p)} (${pv[k][1]}).</span>`;
+      h.innerHTML=t}));
+    const g=$('#fgas').value,t=+$('#ftope').value||0;$('#h_gas').textContent=g!==''?`Excedente para el Apartamento: ${money(Math.max(0,+g-t))}`:''};
+  $('#view').oninput=()=>{$('#lerr').innerHTML='';hints()};hints();
+  $('#bsave').onclick=async()=>{const o=read(),errs=[],nuevos=[];
+    D.unidades.forEach(u=>{const x=o[u.id];if(x.agua[1]==null&&x.energia[1]==null)return;
+      SERV.forEach(([k,n])=>{const a=x[k];if(a[1]==null)return;const q=`${u.nombre}, ${n.toLowerCase()}`;
+        if(a[0]==null)errs.push(`${q}: falta la lectura anterior.`);
+        else if(a[1]<a[0])errs.push(`${q}: la lectura actual (${a[1]}) es menor que la anterior (${a[0]}).`);
+        if(!(a[2]>0))errs.push(`${q}: falta el valor por unidad.`)});
+      nuevos.push({p:cur,u:u.id,agua:x.agua,energia:x.energia})});
+    const g=$('#fgas').value;
+    if(!nuevos.length&&g===''&&!existe)errs.push('Escribe al menos una lectura actual o el recibo de gas.');
+    if(errs.length){$('#lerr').innerHTML=`<div class="err" role="alert">No se guardó. Corrige esto:<ul>${errs.map(e=>`<li>${esc(e)}</li>`).join('')}</ul></div>`;return}
+    nuevos.forEach(n=>{D.registros=D.registros.filter(r=>!(r.p===n.p&&r.u===n.u));D.registros.push(n)});
+    if(g==='')delete D.gas[cur];else D.gas[cur]=+g;
+    const tp=$('#ftope').value;if(tp!=='')D.tope=+tp;
+    await save();per=cur;window._edit=null;go('resumen');toast(`Guardado ${pName(cur)}`)};
+  const bd=$('#bdel');if(bd)bd.onclick=async()=>{if(!bd.dataset.ok){bd.dataset.ok=1;bd.textContent=`Confirmar: eliminar ${pName(cur)}`;return}
+    D.registros=D.registros.filter(r=>r.p!==cur);delete D.gas[cur];await save();window._edit=null;render();toast(`Eliminado ${pName(cur)}`)};
+}
+
+/* ---------- historial ---------- */
+function vHistorial(){
+  const ps=periodos(),ys=[...new Set(ps.map(p=>p.slice(0,4)))].reverse();
+  const y=window._y&&ys.includes(window._y)?window._y:ys[0];
+  if(!y){$('#view').innerHTML='<div class="head"><h1>Historial</h1></div><div class="panel empty">Todavía no hay meses registrados.</div>';return}
+  let saltos=0;
+  const out=D.unidades.map(u=>{const s=[0,0,0,0,0,0];
+    const rows=ps.filter(p=>p.startsWith(y)).map(p=>{const r=reg(p,u.id)||{},g=u.gas?exced(p):0,t=total(p,u.id);
+      const c=SERV.map(([k])=>{const a=r[k],pv=prevS(p,u.id,k),mal=leido(a)&&pv&&a[0]!==pv[k][1];if(mal)saltos++;
+        return `<td${mal?` class="flag" title="No empieza donde terminó ${pName(pv.p)} (${pv[k][1]})"`:''}>${leido(a)?a[0]+' → '+a[1]+(mal?' ⚠':''):'–'}</td><td>${cons(a)}</td><td>${money(sub(a))}</td>`});
+      s[0]+=cons(r.agua);s[1]+=sub(r.agua);s[2]+=cons(r.energia);s[3]+=sub(r.energia);s[4]+=g;s[5]+=t;
+      return `<tr><td><button class="link" data-ed="${p}">${MES[+p.slice(5)-1]}</button></td>${c.join('')}${u.gas?`<td>${money(g)}</td>`:''}<td><b>${money(t)}</b></td></tr>`}).join('');
+    return `<section class="panel"><h2>${esc(u.nombre)}</h2><div class="tbl"><table>
+      <tr><th>Mes</th><th>Lecturas de agua</th><th>m³</th><th>Agua</th><th>Lecturas de energía</th><th>kWh</th><th>Energía</th>${u.gas?'<th>Excedente gas</th>':''}<th>Total</th></tr>${rows}
+      <tr class="sum"><td>Total ${y}</td><td></td><td>${s[0]}</td><td>${money(s[1])}</td><td></td><td>${s[2]}</td><td>${money(s[3])}</td>${u.gas?`<td>${money(s[4])}</td>`:''}<td>${money(s[5])}</td></tr></table></div></section>`}).join('');
+  $('#view').innerHTML=`<div class="head"><h1>Historial</h1><div class="sel"><select id="sy" aria-label="Año">${ys.map(x=>`<option ${x===y?'selected':''}>${x}</option>`).join('')}</select></div></div>
+    ${saltos?`<div class="banner">Hay ${saltos} lectura${saltos>1?'s':''} marcada${saltos>1?'s':''} con ⚠ que no empieza${saltos>1?'n':''} donde terminó el mes anterior.</div>`:''}${out}
+    <p class="hint">Toca el nombre de un mes para corregir sus lecturas.</p>`;
+  $('#sy').onchange=e=>{window._y=e.target.value;render()};
+  $$('[data-ed]').forEach(b=>b.onclick=()=>{window._edit=b.dataset.ed;go('lecturas')});
+}
+
+/* ---------- cuentas de la casa ---------- */
+const cNeto=m=>(m.servicios||0)-(m.pagoInq||0);
+const cOtros=m=>m.gastos?m.gastos.reduce((s,g)=>s+(g.v||0),0):(m.otros||0);
+const cLibre=m=>(m.arriendo||0)-cNeto(m)-cOtros(m);
+const sg=n=>n<0?' class="neg"':'';
+const hoy=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+const fFecha=f=>{const [y,m,d]=f.split('-');return +d+' de '+MES[+m-1].toLowerCase()+' de '+y};
+let draft=null; // otros gastos del mes abierto en el formulario
+async function borrarMes(p){delete D.casa.meses[p];if(window._cp===p)window._cp=null;draft=null;await save();render();toast(`Eliminado ${pName(p)}`)}
+function editarMes(p){window._cp=p;draft=null;if(tab!=='casa')tab='casa';render();const f=$('#formMes');f.scrollIntoView({block:'start'});$('#c_arriendo').focus({preventScroll:true})}
+/* Ficha de un mes, con flechas para pasar al anterior y al siguiente */
+function verMes(p){
+  const C=D.casa,ps=Object.keys(C.meses).sort(),i=ps.indexOf(p),m=C.meses[p],dlg=$('#dlg');if(!m)return;
+  const gs=m.gastos||(m.otros?[{d:'',v:m.otros}]:[]);
+  const ln=(a,b,c='')=>`<div class="line ${c}"><span>${a}</span><span>${b}</span></div>`;
+  dlg.innerHTML=`<div class="dh"><h2 id="dlgT">${pName(p)}</h2><div class="sel"><button class="step" id="dvp" aria-label="Mes anterior" ${i<=0?'disabled':''}>‹</button><button class="step" id="dvn" aria-label="Mes siguiente" ${i>=ps.length-1?'disabled':''}>›</button></div></div>
+    <div class="db">${ln('Arriendo recibido',money(m.arriendo||0))}${ln('Servicios (recibos)',money(-(m.servicios||0)))}${ln('Pago de inquilinos',money(m.pagoInq||0))}
+      ${ln('Servicios a cargo de la casa',money(cNeto(m)),'in')}
+      ${ln('Otros gastos',money(-cOtros(m)))}${gs.map(g=>ln(esc(g.d)||'Sin detalle',money(g.v),'in')).join('')}
+      <div class="line t"><span>Libre del mes</span><span${sg(cLibre(m))}>${money(cLibre(m))}</span></div>
+      ${m.hebert?ln('Plata de Hebert recibida',money(m.hebert)):''}
+      ${m.nota?`<div class="nota"><b>Observaciones.</b> ${esc(m.nota)}</div>`:''}</div>
+    <div class="df"><button class="btn" id="ded">Editar</button><button class="btn dan" id="ddel">Eliminar</button><button class="btn sec" id="dcl" style="margin-left:auto">Cerrar</button></div>`;
+  $('#dvp').onclick=()=>verMes(ps[i-1]);$('#dvn').onclick=()=>verMes(ps[i+1]);
+  $('#dcl').onclick=()=>dlg.close();
+  $('#ded').onclick=()=>{dlg.close();editarMes(p)};
+  const dd=$('#ddel');dd.onclick=async()=>{if(!dd.dataset.ok){dd.dataset.ok=1;dd.textContent=`Confirmar: eliminar ${pName(p)}`;return}dlg.close();await borrarMes(p)};
+  if(!dlg.open)dlg.showModal();
+}
+function vCasa(){
+  const C=D.casa,ps=Object.keys(C.meses).sort();
+  const libreAc=ps.reduce((s,p)=>s+cLibre(C.meses[p]),0),real=libreAc-(C.debo||0);
+  const hebIn=ps.reduce((s,p)=>s+(C.meses[p].hebert||0),0),hebOut=C.hebertGastos.reduce((s,g)=>s+(g.v||0),0);
+  const ys=[...new Set(ps.map(p=>p.slice(0,4)))].reverse(),y=window._cy&&ys.includes(window._cy)?window._cy:ys[0];
+  const def=ps.length?sigP(ps[ps.length-1]):hoyP(),cur=window._cp||def,ex=C.meses[cur],last=ps.length?C.meses[ps[ps.length-1]]:{};
+  const e=ex||{arriendo:last.arriendo};
+  if(!draft||draft.p!==cur)draft={p:cur,g:ex?clone(ex.gastos||(ex.otros?[{d:'',v:ex.otros}]:[])):[]};
+  const s=[0,0,0,0,0,0,0];
+  const rows=ps.filter(p=>p.startsWith(y)).map(p=>{const m=C.meses[p],v=[m.arriendo||0,m.servicios||0,m.pagoInq||0,cNeto(m),cOtros(m),cLibre(m),m.hebert||0];v.forEach((x,i)=>s[i]+=x);
+    const det=(m.gastos||[]).map(g=>g.d).filter(Boolean).join(', ');
+    return `<tr${p===cur&&ex?' style="background:var(--brass-soft)"':''}><td>${MES[+p.slice(5)-1]}</td>${v.map((x,i)=>`<td${i===5?sg(x):''}>${i===5?'<b>':''}${i===6&&!x?'–':money(x)}${i===5?'</b>':''}${i===4&&det?`<span class="sub" title="${esc(det)}">${esc(det)}</span>`:''}</td>`).join('')}
+      <td class="ra"><button class="link" data-ver="${p}">Ver</button><button class="link" data-ed="${p}">Editar</button><button class="link neg" data-del="${p}">Eliminar</button></td></tr>`}).join('');
+  const ult=ps.slice(-18),lib=ult.map(p=>cLibre(C.meses[p])),mp=Math.max(1,...lib),mn=Math.max(0,...lib.map(x=>-x));
+  const chart=ult.map((p,i)=>`<div class="dcol" title="${pName(p)}: ${money(lib[i])}"><b class="up" style="flex:${mp}"><i style="height:${lib[i]>0?Math.max(2,lib[i]/mp*100):0}%"></i></b><b class="dn" style="flex:${mn||.001}"><i style="height:${lib[i]<0?Math.max(2,-lib[i]/mn*100):0}%"></i></b></div>`).join('');
+  const labs=ult.map(p=>`<span>${MES[+p.slice(5)-1].slice(0,3)}${p.endsWith('-01')?' '+p.slice(2,4):''}</span>`).join('');
+  const calc=totalMes(cur);
+  $('#view').innerHTML=`<div class="head"><h1>Cuentas de la casa</h1><button class="btn" id="cnew">Registrar ${pName(def)}</button></div>
+  <section class="panel"><div class="eq">
+      <div class="fig"><span>Libre acumulado</span><b class="num" id="kLibre">${money(libreAc)}</b></div><div class="op" aria-hidden="true">−</div>
+      <div class="fig owe"><span>Lo que debo al fondo</span><b class="num" id="kDebo">${money(C.debo||0)}</b></div>
+      <div class="op" aria-hidden="true">=</div>
+      <div class="fig key"><span>Disponible real</span><b class="num" id="kReal">${money(real)}</b></div></div>
+    ${ult.length?`<div class="div" role="img" aria-label="Libre de cada mes">${chart}</div><div class="dlab">${labs}</div><div class="hint">Libre de cada mes: arriendo, menos los servicios que no cubren los inquilinos, menos otros gastos.</div>`:''}</section>
+  <section class="panel"><div class="head" style="margin-bottom:0"><h2>Meses registrados</h2>${ys.length?`<div class="sel"><select id="cy" aria-label="Año">${ys.map(x=>`<option ${x===y?'selected':''}>${x}</option>`).join('')}</select></div>`:''}</div>
+    ${ps.length?`<div class="tbl"><table><tr><th>Mes</th><th>Arriendo</th><th>Servicios</th><th>Pago inquilinos</th><th>Servicios neto</th><th>Otros gastos</th><th>Libre</th><th>Plata Hebert</th><th class="ra"><span style="position:absolute;left:-9999px">Acciones</span></th></tr>${rows}
+    <tr class="sum"><td>Total ${y}</td>${s.map((x,i)=>`<td${i===5?sg(x):''}>${money(x)}</td>`).join('')}<td class="ra"></td></tr></table></div>`:'<p class="hint">Todavía no hay meses registrados.</p>'}</section>
+  <div class="cols" style="margin-top:16px">
+  <section class="panel wide" id="formMes"><h2 style="margin-bottom:14px">${ex?'Editar':'Registrar'} ${pName(cur)}</h2>
+    <div class="sel" style="margin-bottom:12px">${mesSel('cm',cur)}${anioSel('ca',cur,+def.slice(0,4))}</div>
+    <div class="f2">${num('c_arriendo','Arriendo recibido',e.arriendo)}${num('c_servicios','Servicios (recibos)',e.servicios)}
+    ${num('c_pagoInq','Pago de inquilinos',e.pagoInq)}${num('c_hebert','Plata de Hebert recibida',e.hebert)}</div>
+    ${calc?`<div class="hint">Cobro calculado a inquilinos en ${pName(cur)}: <b>${money(calc)}</b>. <button class="link" id="cuse">Usar este valor</button></div>`:''}
+    <h3 style="margin-top:18px">Otros gastos</h3><div id="glist"></div>
+    <button class="btn sec" id="gadd" style="padding:7px 14px">Agregar gasto</button>
+    <label for="c_nota" style="margin-top:16px">Notas u observaciones del mes</label><textarea id="c_nota" rows="2" maxlength="500" style="width:100%">${esc(e.nota)}</textarea>
+    <div class="hint" id="cprev"></div><div id="cerr"></div>
+    <div class="acts"><button class="btn" id="csave">Guardar ${pName(cur)}</button>${ex?'<button class="btn sec" id="ccan">Cancelar</button><button class="btn dan" id="cdel">Eliminar mes</button>':''}</div></section>
+  <section class="panel"><h2 style="margin-bottom:8px">Plata de Hebert</h2>
+    <div class="line"><span>Recibido en total</span><span>${money(hebIn)}</span></div>
+    ${C.hebertGastos.map((g,i)=>`<div class="line"><span>${esc(g.d)} <button class="link neg" data-hg="${i}" style="font-weight:500;font-size:13px">Quitar</button></span><span class="neg">${money(-g.v)}</span></div>`).join('')}
+    <div class="line t"><span>Saldo</span><span id="kHeb">${money(hebIn-hebOut)}</span></div>
+    <h3 style="margin-top:16px">Registrar un gasto de esta plata</h3>
+    <div class="f2"><div><label for="hd">Concepto</label><input id="hd" maxlength="80"></div>${num('hv','Valor')}</div>
+    <div class="acts" style="margin-top:12px"><button class="btn sec" id="hadd">Agregar gasto</button></div></section>
+  <section class="panel"><h2 style="margin-bottom:14px">Lo que debo al fondo</h2>
+    ${num('cdebo','Valor pendiente por reponer',C.debo||0)}
+    <div class="hint">Se resta del libre acumulado. Bájalo cuando repongas.</div>
+    <div class="acts" style="margin-top:12px"><button class="btn sec" id="dsave">Actualizar valor</button></div></section></div>`;
+  const cy=$('#cy');if(cy)cy.onchange=ev=>{window._cy=ev.target.value;render()};
+  $('#cnew').onclick=()=>editarMes(def);
+  const chg=()=>{window._cp=$('#ca').value+'-'+$('#cm').value;render()};$('#cm').onchange=chg;$('#ca').onchange=chg;
+  const F=['arriendo','servicios','pagoInq','hebert'];
+  const read=()=>{const o={};F.forEach(k=>{const x=$('#c_'+k).value;if(x!=='')o[k]=+x});
+    const g=draft.g.filter(x=>(x.d||'').trim()||x.v).map(x=>({d:(x.d||'').trim(),v:+x.v||0}));
+    if(g.length){o.gastos=g;o.otros=g.reduce((s,x)=>s+x.v,0)}
+    const n=$('#c_nota').value.trim();if(n)o.nota=n;return o};
+  const prevw=()=>{$('#cerr').innerHTML='';const o=read();$('#cprev').innerHTML=`Servicios a cargo de la casa: ${money(cNeto(o))}. Otros gastos: ${money(cOtros(o))}. Libre del mes: <b${sg(cLibre(o))}>${money(cLibre(o))}</b>`};
+  const drawG=()=>{$('#glist').innerHTML=draft.g.map((g,i)=>`<div class="grow"><input data-gd="${i}" value="${esc(g.d)}" maxlength="80" placeholder="¿En qué se gastó?" aria-label="Concepto del gasto ${i+1}"><input type="number" inputmode="decimal" min="0" data-gv="${i}" value="${g.v||''}" placeholder="Valor" aria-label="Valor del gasto ${i+1}"><button class="link neg" data-gx="${i}">Quitar</button></div>`).join('')||'<div class="hint" style="margin:0 0 10px">Sin otros gastos en este mes.</div>';
+    $$('[data-gd]').forEach(x=>x.oninput=()=>{draft.g[+x.dataset.gd].d=x.value;prevw()});
+    $$('[data-gv]').forEach(x=>x.oninput=()=>{draft.g[+x.dataset.gv].v=x.value===''?0:+x.value;prevw()});
+    $$('[data-gx]').forEach(x=>x.onclick=()=>{draft.g.splice(+x.dataset.gx,1);drawG();prevw()})};
+  drawG();
+  $('#gadd').onclick=()=>{draft.g.push({d:'',v:0});drawG();const q=$$('[data-gd]');q[q.length-1].focus()};
+  F.forEach(k=>$('#c_'+k).oninput=prevw);$('#c_nota').oninput=()=>{$('#cerr').innerHTML=''};prevw();
+  const cu=$('#cuse');if(cu)cu.onclick=()=>{$('#c_pagoInq').value=calc;prevw()};
+  $('#csave').onclick=async()=>{const o=read(),er=m=>$('#cerr').innerHTML=`<div class="err" role="alert">No se guardó: ${m}</div>`;
+    if(!Object.keys(o).length)return er('escribe al menos un valor.');
+    if(F.some(k=>o[k]<0)||(o.gastos||[]).some(g=>g.v<0))return er('los valores no pueden ser negativos.');
+    const sinV=(o.gastos||[]).find(g=>!(g.v>0));if(sinV)return er(`falta el valor del gasto "${esc(sinV.d)}".`);
+    C.meses[cur]=o;window._cp=null;draft=null;window._cy=cur.slice(0,4);await save();render();toast(`Guardado ${pName(cur)}`)};
+  const cc=$('#ccan');if(cc)cc.onclick=()=>{window._cp=null;draft=null;render()};
+  const two=(b,txt,fn)=>b.onclick=async()=>{if(!b.dataset.ok){b.dataset.ok=1;b.textContent=txt;return}await fn()};
+  const cd=$('#cdel');if(cd)two(cd,`Confirmar: eliminar ${pName(cur)}`,()=>borrarMes(cur));
+  $$('[data-ver]').forEach(b=>b.onclick=()=>verMes(b.dataset.ver));
+  $$('[data-ed]').forEach(b=>b.onclick=()=>editarMes(b.dataset.ed));
+  $$('[data-del]').forEach(b=>two(b,'Confirmar',()=>borrarMes(b.dataset.del)));
+  $$('[data-hg]').forEach(b=>two(b,'Confirmar',async()=>{C.hebertGastos.splice(+b.dataset.hg,1);await save();render();toast('Gasto quitado')}));
+  $('#hadd').onclick=async()=>{const v=+$('#hv').value;if(!(v>0)){$('#hv').focus();return}
+    C.hebertGastos.push({d:$('#hd').value.trim()||'Gasto',v,f:hoy()});await save();render();toast('Gasto agregado')};
+  $('#dsave').onclick=async()=>{const v=+$('#cdebo').value;C.debo=v>0?v:0;await save();render();toast('Valor actualizado')};
+}
+
+/* ---------- respaldo ---------- */
+function vRespaldo(){
+  const g=gh||{owner:'',repo:'',path:'datos.json',token:''},est=$('#sync').dataset.s;
+  $('#view').innerHTML=`<div class="head"><h1>Respaldo</h1></div>
+  <div class="cols">
+  <section class="panel"><h2 style="margin-bottom:10px">Respaldo automático en GitHub</h2>
+    <p>${gh?(est==='ok'?'<b class="pos">Conectado.</b> Cada cambio que guardas se sube a tu repositorio privado.':est==='err'?'<b class="neg">Conectado, pero el último guardado no subió.</b> Los cambios siguen en este navegador y se subirán en el próximo intento.':'Conectado.'):'Sin conectar, los datos viven solo en este navegador. Conectado, cada cambio se sube a un repositorio privado tuyo, con historial, y puedes abrir el sitio desde cualquier equipo.'}</p>
+    ${gh?'':`<ol class="steps hint" style="font-size:14px"><li>En GitHub, crea un repositorio <b>privado</b> (por ejemplo <i>vivienda-datos</i>) con un README.</li>
+      <li>En Settings → Developer settings → Fine-grained tokens, crea un token solo para ese repositorio con permiso <b>Contents: Read and write</b>.</li>
+      <li>Escribe aquí tu usuario, el repositorio y el token.</li></ol>`}
+    <div class="f2" style="margin-top:12px"><div><label for="go">Usuario de GitHub</label><input id="go" value="${esc(g.owner)}" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+    <div><label for="gr">Repositorio privado</label><input id="gr" value="${esc(g.repo)}" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+    <div><label for="gp">Archivo</label><input id="gp" value="${esc(g.path)}" autocapitalize="off" spellcheck="false"></div>
+    <div><label for="gt">Token de acceso</label><input id="gt" type="password" value="${esc(g.token)}" autocomplete="off"></div></div>
+    <div class="hint">El token se guarda solo en este navegador. En cada equipo nuevo hay que escribirlo una vez.</div>
+    <div id="gmsg"></div>
+    <div class="acts"><button class="btn" id="gc">${gh?'Guardar y reconectar':'Conectar'}</button>${gh?'<button class="btn sec" id="gs">Subir ahora</button><button class="btn sec" id="gd">Desconectar</button>':''}</div></section>
+  <section class="panel"><h2 style="margin-bottom:10px">Copia manual</h2>
+    <p>Descarga un archivo con todos los datos, o restaura uno que hayas descargado antes.</p>
+    <div class="acts" style="margin-top:6px"><button class="btn sec" id="ex">Descargar copia</button><button class="btn sec" id="im">Restaurar copia</button><input type="file" id="imf" accept=".json,application/json" hidden></div>
+    <div id="imsg"></div>
+    <div class="hint" style="margin-top:14px">${D.ts?'Último cambio guardado: '+new Date(D.ts).toLocaleString('es-CO',{dateStyle:'long',timeStyle:'short'}):'Sin cambios desde la carga inicial.'}</div></section></div>`;
+  const msg=(h,c)=>$('#gmsg').innerHTML=h?`<div class="${c||'hint'}" style="margin-top:12px">${h}</div>`:'';
+  const adoptar=async r=>{D=r;normalizar();const m=migrar();lsSet(LS,D);lsDel(LSD);if(m)await save();else setSync('ok')};
+  $('#gc').onclick=async()=>{const n={owner:$('#go').value.trim(),repo:$('#gr').value.trim(),path:$('#gp').value.trim().replace(/^\/+/,'')||'datos.json',token:$('#gt').value.trim()};
+    if(!n.owner||!n.repo||!n.token){msg('Completa usuario, repositorio y token.','err');return}
+    const old=gh,oldSha=sha;gh=n;sha=null;msg('Conectando…');
+    try{const remote=await ghLoad();lsSet(LSG,gh);
+      if(valido(remote)&&lsGet(LSD)){ // hay datos en los dos lados: decide la persona
+        setSync('err','falta elegir qué datos conservar');render();
+        $('#gmsg').innerHTML=`<div class="err" style="margin-top:12px">En GitHub ya hay datos guardados, y en este navegador hay cambios que no están allá. ¿Cuáles conservar?
+          <div class="acts" style="margin-top:10px"><button class="btn sec" id="kRem">Usar los de GitHub</button><button class="btn sec" id="kLoc">Subir los de este navegador</button></div></div>`;
+        $('#kRem').onclick=async()=>{await adoptar(remote);render();toast('Datos cargados de GitHub')};
+        $('#kLoc').onclick=async()=>{const ok=await save();render();toast(ok?'Datos subidos a GitHub':'No se pudo subir')};
+        return}
+      if(valido(remote)){await adoptar(remote);render();toast('Conectado: datos cargados de GitHub')}
+      else{const ok=await save();render();toast(ok?'Conectado: primera copia subida':'Conectado, pero no se pudo subir')}}
+    catch(e){gh=old;sha=oldSha;msg(`No se pudo conectar: ${esc(e.message)}. Revisa el usuario, el nombre del repositorio y los permisos del token.`,'err')}};
+  const gs=$('#gs');if(gs)gs.onclick=async()=>{const ok=await save();render();toast(ok?'Datos subidos a GitHub':'No se pudo subir')};
+  const gd=$('#gd');if(gd)gd.onclick=()=>{gh=null;sha=null;lsDel(LSG);setSync('local');render()};
+  $('#ex').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(D,null,1)],{type:'application/json'}));a.download='vivienda-copia-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove()};
+  $('#im').onclick=()=>$('#imf').click();
+  $('#imf').onchange=async e=>{const im=h=>$('#imsg').innerHTML=`<div class="err" style="margin-top:12px">${h}</div>`;
+    try{const j=JSON.parse(await e.target.files[0].text());if(!valido(j))throw 0;D=j;normalizar();migrar();await save();render();toast('Copia restaurada')}
+    catch(x){im('Ese archivo no es una copia válida de este sitio. No se cambió nada.')}};
+}
+
+/* ---------- inicio ---------- */
+(async()=>{
+  D=lsGet(LS);
+  if(!valido(D))D=clone(SEED);
+  else if(!lsGet(LSG)&&D.ts===undefined)lsSet(LSD,1); // datos de una versión anterior del sitio: pueden tener cambios sin respaldar
+  normalizar();if(migrar())lsSet(LS,D);
+  gh=lsGet(LSG);if(gh&&!(gh.owner&&gh.repo&&gh.token))gh=null;
+  render();
+  if(!gh)return;
+  setSync('busy');const r0=rev;
+  try{const r=await ghLoad();
+    if(rev!==r0)return;                       // la persona ya guardó algo mientras cargaba: su guardado manda
+    if(lsGet(LSD)||!valido(r)){await save();return} // cambios locales sin subir, o primera vez: se suben
+    D=r;normalizar();const m=migrar();lsSet(LS,D);render();
+    if(m)await save();else setSync('ok');
+  }catch(e){setSync('err',e.message)}
+})();
+window.addEventListener('online',()=>{if(gh&&lsGet(LSD))save()});
+</script>
+</body>
+</html>
